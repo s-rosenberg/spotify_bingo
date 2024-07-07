@@ -5,6 +5,7 @@ import requests
 
 from typing import List, Dict
 import json
+from PIL import Image
 
 from constants import ENVFILE, PLAYLIST_DATA_URL, SPOTIFY_TOKEN_URL
 
@@ -47,12 +48,28 @@ def get_playlist_data(playlist_id: str) -> List[dict]:
 
     return data.get('items')
 
-
 def save_image_to_file(image_url:str, filepath: str) -> None:
-    pass
+    response = requests.get(image_url, stream=True).raw
+    img = Image.open(response)
+    img.save(filepath)
 
 def get_images(song_data: dict) -> List[str]:
-    pass
+    images = list()
+    images_from_album = song_data.get('album', {}).get('images', [])
+    images += [image.get('url') for image in images_from_album]
+    images_from_external_urls = song_data.get('external_urls', {}).get('images', [])
+    images += [image.get('url') for image in images_from_external_urls]
+
+    if not any(images):
+        raise ValueError(f"Couldn't find images for {get_title(song_data)}")
+    return images
+
+def get_title(song_data: dict) -> str:
+    return song_data['track']['name'].split('-')[0].strip()
+
+def get_artist(song_data: dict) -> str:
+    artists = song_data['track']['artists']
+    return ', '.join([artist['name'] for artist in artists])
 
 if __name__ == '__main__':
     print(get_playlist_data('2bkPhR6wORdInvwLZDpD8K'))
