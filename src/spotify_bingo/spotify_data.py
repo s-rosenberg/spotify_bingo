@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import requests
 
 from typing import List, Dict
-import json
 from PIL import Image
 
 from constants import ENVFILE, PLAYLIST_DATA_URL, SPOTIFY_TOKEN_URL
